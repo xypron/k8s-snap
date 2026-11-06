@@ -1,0 +1,70 @@
+From 12d05229cf3cb7041275d5ccf5b5c45061adade2 Mon Sep 17 00:00:00 2001
+From: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+Date: Tue, 3 Nov 2026 13:01:54 +0100
+Subject: [PATCH] hack/lib: add linux/riscv64 to supported build platforms
+
+Add linux/riscv64 to the KUBE_SUPPORTED_*_PLATFORMS arrays and a
+matching CGO/CC case arm in kube::golang::set_platform_envs, mirroring
+the entries of the other non-amd64 architectures.
+
+Without this, "make WHAT=cmd/kubernetes" produces no output under
+_output/bin/ when GOARCH=riscv64 and the snap build fails with:
+cp: cannot stat '_output/bin/kubernetes': No such file or directory
+
+Upstream Kubernetes has no official riscv64 support yet. Drop this
+patch once it lands.
+
+Signed-off-by: Heinrich Schuchardt <heinrich.schuchardt@canonical.com>
+---
+ hack/lib/golang.sh | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/hack/lib/golang.sh b/hack/lib/golang.sh
+index 95c775f8f70..de10c86197f 100755
+--- a/hack/lib/golang.sh
++++ b/hack/lib/golang.sh
+@@ -25,6 +25,7 @@ readonly KUBE_SUPPORTED_SERVER_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+ )
+ 
+ # The node platforms we build for
+@@ -33,6 +34,7 @@ readonly KUBE_SUPPORTED_NODE_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   windows/amd64
+ )
+ 
+@@ -45,6 +47,7 @@ readonly KUBE_SUPPORTED_CLIENT_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   darwin/amd64
+   darwin/arm64
+   windows/amd64
+@@ -59,6 +62,7 @@ readonly KUBE_SUPPORTED_TEST_PLATFORMS=(
+   linux/arm64
+   linux/s390x
+   linux/ppc64le
++  linux/riscv64
+   darwin/amd64
+   darwin/arm64
+   windows/amd64
+@@ -507,6 +511,10 @@ kube::golang::set_platform_envs() {
+         export CGO_ENABLED=1
+         export CC=${KUBE_LINUX_S390X_CC:-s390x-linux-gnu-gcc}
+         ;;
++      "linux/riscv64")
++        export CGO_ENABLED=1
++        export CC=${KUBE_LINUX_RISCV64_CC:-riscv64-linux-gnu-gcc}
++        ;;
+     esac
+   fi
+ 
+-- 
+2.53.0
