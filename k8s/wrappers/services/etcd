@@ -2,4 +2,12 @@
 
 . "$SNAP/k8s/lib.sh"
 
+# etcd refuses to start on architectures that it does not officially
+# support unless ETCD_UNSUPPORTED_ARCH is set to the Go architecture.
+case "$(uname -m)" in
+  riscv64)
+    export ETCD_UNSUPPORTED_ARCH=riscv64
+    ;;
+esac
+
 k8s::common::execute etcd
